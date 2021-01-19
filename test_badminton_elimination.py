@@ -1,7 +1,7 @@
-'''Test file for baseball elimination lab created for Advanced Algorithms
-Spring 2020 at Olin College.'''
+'''Test file for badminton elimination lab created for Advanced Algorithms
+Spring 2021 at Olin College.'''
 
-from baseball_elimination import Division
+from badminton_elimination import Division
 
 
 def assert_eliminated(division, team):

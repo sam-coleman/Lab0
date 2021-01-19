@@ -1,5 +1,5 @@
-'''Code file for baseball elimination lab created for Advanced Algorithms
-Spring 2020 at Olin College. The code for this lab has been adapted from:
+'''Code file for badminton elimination lab created for Advanced Algorithms
+Spring 2021 at Olin College. The code for this lab has been adapted from:
 https://github.com/ananya77041/baseball-elimination/blob/master/src/BaseballElimination.java'''
 
 import sys
@@ -12,7 +12,7 @@ import cvxopt
 
 class Division:
     '''
-    The Division class represents a baseball division. This includes all the
+    The Division class represents a badminton division. This includes all the
     teams that are a part of that division, their winning and losing history,
     and their remaining games for the season.
 
@@ -81,7 +81,7 @@ class Division:
         return flag1
 
     def create_network(self, teamID):
-        '''Builds up the network needed for solving the baseball elimination
+        '''Builds up the network needed for solving the badminton elimination
         problem as a network flows problem & stores it in self.G. Returns a
         dictionary of saturated edges that maps team pairs to the amount of
         additional games they have against each other.
@@ -127,6 +127,7 @@ class Division:
         maxflow=pic.Problem()
 
         #TODO: implement this
+        # we recommend using the 'cvxopt' solver once you set up the problem
 
         return False
 
@@ -147,8 +148,8 @@ class Division:
 
 class Team:
     '''
-    The Team class represents one team within a baseball division for use in
-    solving the baseball elimination problem. This class includes information
+    The Team class represents one team within a badminton division for use in
+    solving the badminton elimination problem. This class includes information
     on how many games the team has won and lost so far this season as well as
     information on what games they have left for the season.
 
@@ -192,4 +193,4 @@ if __name__ == '__main__':
         for (ID, team) in division.teams.items():
             print(f'{team.name}: Eliminated? {division.is_eliminated(team.ID, "Linear Programming")}')
     else:
-        print("To run this code, please specify an input file name. Example: python baseball_elimination.py teams2.txt.")
+        print("To run this code, please specify an input file name. Example: python badminton_elimination.py teams2.txt.")
