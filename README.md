@@ -18,9 +18,9 @@ on a specific input table (defined in a txt file, see `teams2.txt` and `teams4.t
 you can simply run `python badminton_elimination.py teams2.txt`
 
 We recommend using the `networkx` function to solve the problem using network flows
-(documentation can be found [here](https://networkx.github.io/documentation/networkx-1.10/reference/generated/networkx.algorithms.flow.maximum_flow.html) and [here](https://networkx.github.io/documentation/networkx-1.10/reference/generated/networkx.\\algorithms.flow.maximum\_flow.html))
+(documentation can be found [here](https://networkx.github.io/documentation/networkx-1.10/reference/generated/networkx.algorithms.flow.maximum_flow.html))
 and using the `picos` solver to solve the problem using linear programming
-(documentation can be found [here](https://picos-api.gitlab.io/picos/graphs.html#max-flow-min-cut-lp) and [here](https://picos-api.gitlab.io/picos/graphs.html#max-flow-min-cut-lp)).
+(documentation can be found [here](https://picos-api.gitlab.io/picos/graphs.html#max-flow-min-cut-lp)).
 
 Your program should be able to answer the following question:
 Who is eliminated given a table of the current standings? You should be able to
