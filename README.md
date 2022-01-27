@@ -31,14 +31,14 @@ remainder of the rows and columns correspond to the same rows and columns as wer
 specified in the table in part 1):
 ```
 4
-Sherrie     83 71  8  0 1 6 1
+Audrey      83 71  8  0 1 6 1
 Shashank    80 79  3  1 0 0 2
-Manu        78 78  6  6 0 0 0
-Cassandra   77 82  3  1 2 0 0
+Jack        78 78  6  6 0 0 0
+Shirin      77 82  3  1 2 0 0
 
 Corresponding output:
-Sherrie: Eliminated? False
+Audrey: Eliminated? False
 Shashank: Eliminated? True
-Manu: Eliminated? False
-Cassandra: Eliminated? True
+Jack: Eliminated? False
+Shirin: Eliminated? True
 ```
