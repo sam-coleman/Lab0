@@ -122,8 +122,8 @@ class Division:
             # assuming order indicates direction
             self.G.add_edge("S", combo_name, edge_value)
             # add edges between middle columns
-            self.G.add_edge(combo_name, combo[0], float('inf')) 
-            self.G.add_edge(combo_name, combo[1], float('inf')) 
+            self.G.add_edge(combo_name, combo[0], float('inf'))
+            self.G.add_edge(combo_name, combo[1], float('inf'))
 
         # add edges from last column to sink
         for team in other_team_IDs:
@@ -139,12 +139,12 @@ class Division:
         the amount of additional games they have against each other
         return: True if team is eliminated, False otherwise
         '''
-        out_edges = G.out_edges('S') # 's' is source node
+        out_edges = self.G.out_edges('S') # 's' is source node
         source_out = 0 # sum of capacites of edges leaving the source
         for edge in out_edges:
-            source_out += nx.maximum_flow_value(G, edge[0], edge[1])
+            source_out += nx.maximum_flow_value(self.G, edge[0], edge[1])
 
-        max_flow, flow_dict = nx.maximum_flow(G, 'S', 'T') # 's' is source, 't' is sink
+        max_flow, flow_dict = nx.maximum_flow(self.G, 'S', 'T') # 's' is source, 't' is sink
         if source_out >= max_flow:
             return True # person has been eliminated
         else:
