@@ -94,6 +94,7 @@ class Division:
         saturated_edges = {}
 
         #TODO: implement this
+        # make 1 network for the team with the given id
 
         return saturated_edges
 
@@ -109,6 +110,12 @@ class Division:
         '''
 
         #TODO: implement this
+        # s = sum of capacites of edges leaving the source
+        # m = max_flow
+        # if s >= m:
+        #   person has not been eliminated
+        # else:
+        #   person has been eliminated
 
         return False
 
