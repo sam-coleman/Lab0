@@ -38,6 +38,7 @@ class Division:
 
         lines = lines[1:]
         for ID, teaminfo in enumerate(lines):
+            # ID, teamname, wins, losses, remaining, against
             team = Team(int(ID), teaminfo[0], int(teaminfo[1]), int(teaminfo[2]), int(teaminfo[3]), list(map(int, teaminfo[4:])))
             self.teams[ID] = team
 
@@ -95,6 +96,41 @@ class Division:
 
         #TODO: implement this
         # make 1 network for the team with the given id
+        # get team IDs for all teams
+        all_teams = self.get_team_IDs
+        # save team IDs for all but teamID
+        other_team_IDs = []
+        #other_teams_IDs = all_teams.remove(teamID)
+        for team in all_teams != teamID:
+            other_team_IDs.append(team)
+
+        # add node S to G
+        # add node T to G
+        self.G.add_node("S")
+        self.G.add_node("T")
+        other_team_combinations = itertools.combinations(other_team_IDs, 2)
+
+        # create column of nodes before sink
+        for team in other_team_IDs:
+            self.G.add_node(team)
+
+        # create column of nodes after source and generate edge values and shit
+        for combo in other_team_combinations:
+            # add node to G
+            combo_name = combo[0]+"_"+combo[1]
+            self.G.add_node(combo_name)
+            # add edge between source and next node with value edge_value
+            edge_value = combo[0].get_against(combo[1])
+            # assuming order indicates direction
+            self.G.add_edge("S", combo_name, edge_value)
+            # add edges between middle columns
+            self.G.add_edge(combo_name, combo[0], float('inf')) 
+            self.G.add_edge(combo_name, combo[1], float('inf')) 
+
+        # add edges from last column to sink
+        for team in other_team_IDs:
+            edge_value = teamID.wins + teamID.remaining - team.wins
+            self.G.add_edge(team, "T", edge_value)
 
         return saturated_edges
 
