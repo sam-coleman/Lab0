@@ -98,8 +98,9 @@ class Division:
         # save team IDs for all but teamID
         other_team_IDs = []
         #other_teams_IDs = all_teams.remove(teamID)
-        for team in all_teams != teamID:
-            other_team_IDs.append(team)
+        for team in all_teams:
+            if team != teamID:
+                other_team_IDs.append(team)
 
         # add source node to G
         self.G.add_node("S")
