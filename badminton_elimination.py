@@ -72,12 +72,12 @@ class Division:
             if team.wins + team.remaining < other_team.wins:
                 flag1 = True
 
-        saturated_edges = self.create_network(teamID)
+        self.create_network(teamID)
         if not flag1:
             if solver == "Network Flows":
-                flag1 = self.network_flows(saturated_edges)
+                flag1 = self.network_flows()
             elif solver == "Linear Programming":
-                flag1 = self.linear_programming(saturated_edges)
+                flag1 = self.linear_programming()
 
         return flag1
 
@@ -134,35 +134,34 @@ class Division:
 
         return saturated_edges
 
-    def network_flows(self, saturated_edges):
+    def network_flows(self):
         '''Uses network flows to determine if the team with given team ID
         has been eliminated. You can feel free to use the built in networkx
         maximum flow function or the maximum flow function you implemented as
         part of the in class implementation activity.
 
-        saturated_edges: dictionary of saturated edges that maps team pairs to
         the amount of additional games they have against each other
         return: True if team is eliminated, False otherwise
         '''
+        out_edges = G.out_edges('S') # 's' is source node
+        source_out = 0 # sum of capacites of edges leaving the source
+        for edge in out_edges:
+            source_out += nx.maximum_flow_value(G, edge[0], edge[1])
 
-        #TODO: implement this
-        # s = sum of capacites of edges leaving the source
-        # m = max_flow
-        # if s >= m:
-        #   person has not been eliminated
-        # else:
-        #   person has been eliminated
+        max_flow, flow_dict = nx.maximum_flow(G, 'S', 'T') # 's' is source, 't' is sink
+        if source_out >= max_flow:
+            return True # person has been eliminated
+        else:
+            return False # person has not been eliminated
 
-        return False
 
-    def linear_programming(self, saturated_edges):
+    def linear_programming(self):
         '''Uses linear programming to determine if the team with given team ID
         has been eliminated. We recommend using a picos solver to solve the
         linear programming problem once you have it set up.
         Do not use the flow_constraint method that Picos provides (it does all of the work for you)
         We want you to set up the constraint equations using picos (hint: add_constraint is the method you want)
 
-        saturated_edges: dictionary of saturated edges that maps team pairs to
         the amount of additional games they have against each other
         returns True if team is eliminated, False otherwise
         '''
