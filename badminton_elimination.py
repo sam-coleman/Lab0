@@ -92,9 +92,6 @@ class Division:
         the amount of additional games they have against each other
         '''
 
-        saturated_edges = {}
-
-        #TODO: implement this
         # make 1 network for the team with the given id
         # get team IDs for all teams
         all_teams = self.get_team_IDs
@@ -104,10 +101,11 @@ class Division:
         for team in all_teams != teamID:
             other_team_IDs.append(team)
 
-        # add node S to G
-        # add node T to G
+        # add source node to G
         self.G.add_node("S")
+        # add sink node to G
         self.G.add_node("T")
+        # get combinations of teams
         other_team_combinations = itertools.combinations(other_team_IDs, 2)
 
         # create column of nodes before sink
@@ -131,8 +129,6 @@ class Division:
         for team in other_team_IDs:
             edge_value = teamID.wins + teamID.remaining - team.wins
             self.G.add_edge(team, "T", edge_value)
-
-        return saturated_edges
 
     def network_flows(self):
         '''Uses network flows to determine if the team with given team ID
