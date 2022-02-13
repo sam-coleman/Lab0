@@ -94,37 +94,37 @@ class Division:
 
         # make 1 network for the team with the given id
         # get team IDs for all teams
-        all_teams = self.get_team_IDs
+        all_teams = self.teams
         # save team IDs for all but teamID
-        other_team_IDs = []
-        #other_teams_IDs = all_teams.remove(teamID)
+        other_teams = []
+        # other_teams_IDs = all_teams.remove(teamID)
         for team in all_teams:
-            if team != teamID:
-                other_team_IDs.append(team)
+            if team.ID != teamID:
+                other_teams.append(team)
 
         # add source node to G
         self.G.add_node("S")
         # add sink node to G
         self.G.add_node("T")
         # get combinations of teams
-        other_team_combinations = itertools.combinations(other_team_IDs, 2)
+        other_team_combinations = itertools.combinations(other_teams, 2)
 
         # create column of nodes before sink
-        for team in other_team_IDs:
-            self.G.add_node(team)
+        for team in other_teams:
+            self.G.add_node(team.ID)
 
         # create column of nodes after source and generate edge values and shit
         for combo in other_team_combinations:
             # add node to G
-            combo_name = combo[0]+"_"+combo[1]
+            combo_name = str(combo[0])+"_"+str(combo[1])
             self.G.add_node(combo_name)
             # add edge between source and next node with value edge_value
             edge_value = combo[0].get_against(combo[1])
             # assuming order indicates direction
             self.G.add_edge("S", combo_name, edge_value)
             # add edges between middle columns
-            self.G.add_edge(combo_name, combo[0], float('inf'))
-            self.G.add_edge(combo_name, combo[1], float('inf'))
+            self.G.add_edge(combo_name, str(combo[0]), float('inf'))
+            self.G.add_edge(combo_name, str(combo[1]), float('inf'))
 
         # add edges from last column to sink
         for team in other_team_IDs:
