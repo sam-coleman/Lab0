@@ -92,6 +92,7 @@ class Division:
         return: dictionary of saturated edges that maps team pairs to
         the amount of additional games they have against each other
         '''
+        #create new graph to clear out old one
         self.G = nx.DiGraph()
         # make 1 network for the team with the given id
         # get team IDs for all teams
@@ -152,7 +153,9 @@ class Division:
             source_out += nx.maximum_flow_value(self.G, edge[0], edge[1])
 
         max_flow = nx.maximum_flow_value(self.G, 'S', 'T') # 'S' is source, 'T' is sink
-
+        print("source_out, max_flow",source_out, max_flow)
+        # for edge in self.G.out_edges('S'):
+        #     print(edge, nx.maximum_flow_value(self.G, edge[0], edge[1]))
         if source_out > max_flow: # not sure if should be > or >=
             return True # person has been eliminated
         else:
@@ -169,11 +172,27 @@ class Division:
         the amount of additional games they have against each other
         returns True if team is eliminated, False otherwise
         '''
+        # https://picos-api.gitlab.io/picos/tutorial.html
 
         maxflow=pic.Problem()
 
-        #TODO: implement this
+        # assign a consistent variable name to weight of each edge eg. ("1","2") -> "1_2"
+
+        # objective function should be weights of edges going into t
+        maxflow.set_objective('max', sum(weights of edges out of S))
+
+        for each node:
+            maxflow.add_constraint(sum(edges going in) == sum(edges going out))
+
+        for each edge:
+            maxflow.add_constraint(edge weight <= edge capacity)
+            maxflow.add_constraint(edge weight >= 0)
+
         # we recommend using the 'cvxopt' solver once you set up the problem
+        # maxflow.options.solver = "cvxopt"
+        cvxopt.solvers.lp
+        # solution = P.solve()
+        # solution.primals
 
         return False
 
