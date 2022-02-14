@@ -95,12 +95,12 @@ class Division:
         # make 1 network for the team with the given id
         # get team IDs for all teams
         all_teams = self.teams
-        # save team IDs for all but teamID
+        # list of other team objects (all teams except the given id)
         other_teams = []
         # other_teams_IDs = all_teams.remove(teamID)
-        for team in all_teams:
-            if team.ID != teamID:
-                other_teams.append(team)
+        for team in all_teams.items():
+            if team[1].ID != teamID:
+                other_teams.append(team[1])
 
         # add source node to G
         self.G.add_node("S")
@@ -108,28 +108,33 @@ class Division:
         self.G.add_node("T")
         # get combinations of teams
         other_team_combinations = itertools.combinations(other_teams, 2)
-
-        # create column of nodes before sink
+        # make list instead of itertools.combinations object for ease
+        list_other_team_combos = list(other_team_combinations)
+        # create column of nodes before sink, node is ID of each other team
         for team in other_teams:
             self.G.add_node(team.ID)
 
         # create column of nodes after source and generate edge values and shit
-        for combo in other_team_combinations:
+        #for i in range(len(list_other_team_combos)):
+        for combo in list_other_team_combos:
             # add node to G
-            combo_name = str(combo[0])+"_"+str(combo[1])
+            combo_name = str(combo[0].ID) + "_" + str(combo[1].ID)
             self.G.add_node(combo_name)
-            # add edge between source and next node with value edge_value
-            edge_value = combo[0].get_against(combo[1])
-            # assuming order indicates direction
-            self.G.add_edge("S", combo_name, edge_value)
-            # add edges between middle columns
-            self.G.add_edge(combo_name, str(combo[0]), float('inf'))
-            self.G.add_edge(combo_name, str(combo[1]), float('inf'))
 
+            # add edge between source and next node with value edge_value
+            edge_value = combo[0].get_against(combo[1].ID)
+            # assuming order indicates direction
+            self.G.add_edge("S", combo_name, capacity = edge_value)
+            # add edges between middle columns
+            self.G.add_edge(combo_name, str(combo[0]), capacity =  float('inf'))
+            self.G.add_edge(combo_name, str(combo[1]), capacity = float('inf'))
+
+        # team object for "network owner" (their teamID)
+        net_owner = all_teams[teamID]
         # add edges from last column to sink
-        for team in other_team_IDs:
-            edge_value = teamID.wins + teamID.remaining - team.wins
-            self.G.add_edge(team, "T", edge_value)
+        for team in other_teams:
+            edge_value = net_owner.wins + net_owner.remaining - team.wins
+            self.G.add_edge(team, "T", capacity = edge_value)
 
     def network_flows(self):
         '''Uses network flows to determine if the team with given team ID
