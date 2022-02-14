@@ -8,6 +8,7 @@ import picos as pic
 import networkx as nx
 import itertools
 import cvxopt
+import matplotlib as plt
 
 
 class Division:
@@ -91,7 +92,7 @@ class Division:
         return: dictionary of saturated edges that maps team pairs to
         the amount of additional games they have against each other
         '''
-
+        self.G = nx.DiGraph()
         # make 1 network for the team with the given id
         # get team IDs for all teams
         all_teams = self.teams
@@ -126,15 +127,15 @@ class Division:
             # assuming order indicates direction
             self.G.add_edge("S", combo_name, capacity = edge_value)
             # add edges between middle columns
-            self.G.add_edge(combo_name, str(combo[0]), capacity =  float('inf'))
-            self.G.add_edge(combo_name, str(combo[1]), capacity = float('inf'))
+            self.G.add_edge(combo_name, str(combo[0].ID), capacity = float('inf'))
+            self.G.add_edge(combo_name, str(combo[1].ID), capacity = float('inf'))
 
         # team object for "network owner" (their teamID)
         net_owner = all_teams[teamID]
         # add edges from last column to sink
         for team in other_teams:
             edge_value = net_owner.wins + net_owner.remaining - team.wins
-            self.G.add_edge(team, "T", capacity = edge_value)
+            self.G.add_edge(str(team.ID), "T", capacity = edge_value)
 
     def network_flows(self):
         '''Uses network flows to determine if the team with given team ID
@@ -150,8 +151,9 @@ class Division:
         for edge in out_edges:
             source_out += nx.maximum_flow_value(self.G, edge[0], edge[1])
 
-        max_flow, flow_dict = nx.maximum_flow(self.G, 'S', 'T') # 's' is source, 't' is sink
-        if source_out >= max_flow:
+        max_flow = nx.maximum_flow_value(self.G, 'S', 'T') # 'S' is source, 'T' is sink
+
+        if source_out > max_flow: # not sure if should be > or >=
             return True # person has been eliminated
         else:
             return False # person has not been eliminated
