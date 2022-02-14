@@ -9,6 +9,7 @@ import networkx as nx
 import itertools
 import cvxopt
 import matplotlib as plt
+from picos import RealVariable
 
 
 class Division:
@@ -176,21 +177,24 @@ class Division:
 
         maxflow=pic.Problem()
 
-        # assign a consistent variable name to weight of each edge eg. ("1","2") -> "1_2"
-
-        # objective function should be weights of edges going into t
-        maxflow.set_objective('max', sum(weights of edges out of S))
-
-        for each node:
+        # make list of all nodes RealVariables
+        nodes = [RealVariable(str(node)) for node in self.G.nodes]
+        for node in nodes:
             maxflow.add_constraint(sum(edges going in) == sum(edges going out))
 
-        for each edge:
-            maxflow.add_constraint(edge weight <= edge capacity)
+        # make list of all edges as RealVariables
+        edges = [RealVariable(edge[0]+"-"+edge[1]) for edge in self.G.edges]
+        for edge in edges:
+            maxflow.add_constraint(edge weight <= capacity) #edge weight <= edge capacity
             maxflow.add_constraint(edge weight >= 0)
+
+        # objective function should be weights of edges going into t
+        out_edges = self.G.out_edges('S')
+        maxflow.set_objective('max', sum(weights of edges out of S)) #
 
         # we recommend using the 'cvxopt' solver once you set up the problem
         # maxflow.options.solver = "cvxopt"
-        cvxopt.solvers.lp
+        cvxopt.solvers.lp # I think this one
         # solution = P.solve()
         # solution.primals
 
