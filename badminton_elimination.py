@@ -129,8 +129,8 @@ class Division:
             # assuming order indicates direction
             self.G.add_edge("S", combo_name, capacity = edge_value)
             # add edges between middle columns
-            self.G.add_edge(combo_name, str(combo[0].ID), capacity = float('inf'))
-            self.G.add_edge(combo_name, str(combo[1].ID), capacity = float('inf'))
+            self.G.add_edge(combo_name, str(combo[0].ID), capacity = 10000)#float('inf'))
+            self.G.add_edge(combo_name, str(combo[1].ID), capacity = 10000)#float('inf'))
 
         # team object for "network owner" (their teamID)
         net_owner = all_teams[teamID]
@@ -177,20 +177,24 @@ class Division:
 
         maxflow=pic.Problem()
 
-        # make list of all nodes RealVariables
-        nodes = [RealVariable(str(node)) for node in self.G.nodes]
-        for node in nodes:
-            maxflow.add_constraint(sum(edges going in) == sum(edges going out))
-
         # make list of all edges as RealVariables
         edges = [RealVariable(edge[0]+"-"+edge[1]) for edge in self.G.edges]
-        for edge in edges:
-            maxflow.add_constraint(edge weight <= capacity) #edge weight <= edge capacity
-            maxflow.add_constraint(edge weight >= 0)
 
-        # objective function should be weights of edges going into t
-        out_edges = self.G.out_edges('S')
-        maxflow.set_objective('max', sum(weights of edges out of S)) #
+        # add conservation constraints
+        for node in self.G.nodes:
+            pass
+            # maxflow.add_constraint(sum(edges going in) == sum(edges going out))
+        into_sink = [] # list of edges going into sink
+        for edge in edges:
+            s = str(edge).split("-")
+            capacity = nx.maximum_flow_value(self.G, s[0], s[1])
+            maxflow.add_constraint(edge <= capacity) #edge weight <= edge capacity
+            maxflow.add_constraint(edge >= 0)
+            if s[1] == "T": # build up list of edges going into sink
+                into_sink.append(edge)
+
+        # objective function sums weights of edges going into T
+        maxflow.set_objective('max', sum(into_sink)) # idk if this will actually work
 
         # we recommend using the 'cvxopt' solver once you set up the problem
         # maxflow.options.solver = "cvxopt"
