@@ -182,9 +182,18 @@ class Division:
 
         # add conservation constraints
         for node in self.G.nodes:
-            pass
-            # maxflow.add_constraint(sum(edges going in) == sum(edges going out))
+            in_edges = []
+            out_edges = []
+            for edge in edges:
+                s = str(edge).split("-")
+                if s[0] == node:
+                    out_edges.append(edge)
+                if s[1] == node:
+                    in_edges.append(edge)
+            maxflow.add_constraint(sum(in_edges) == sum(out_edges))
+
         into_sink = [] # list of edges going into sink
+        # add capacity and >=0 constraints
         for edge in edges:
             s = str(edge).split("-")
             capacity = nx.maximum_flow_value(self.G, s[0], s[1])
