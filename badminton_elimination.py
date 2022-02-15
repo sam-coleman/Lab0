@@ -217,17 +217,17 @@ class Division:
         maxflow.set_objective('max', sum(into_sink)) # idk if this will actually work
 
         # we recommend using the 'cvxopt' solver once you set up the problem
-        maxflow.options.solver = "cvxopt"
+        # maxflow.options.solver = "cvxopt"
         # cvxopt.solvers.lp # I think this one
-        solution = maxflow.solve()
+        solution = maxflow.solve(verbose=0, solver='cvxopt')
         primals = solution.primals
+        #print(primals)
 
         for weight in primals:
             s = str(weight.name).split("-")
-            print(weight.name)
             if s[0] == 'S': # if any edges out of source are not saturated, return false
                 capacity = nx.maximum_flow_value(self.G, s[0], s[1])
-                if (capacity - weight) < 1e-6:
+                if abs(capacity - weight) < 1e-5:
                     return False
         return True
 
