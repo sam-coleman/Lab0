@@ -10,6 +10,7 @@ import itertools
 import cvxopt
 import matplotlib as plt
 from picos import RealVariable
+import numpy as np
 
 
 class Division:
@@ -129,8 +130,8 @@ class Division:
             # assuming order indicates direction
             self.G.add_edge("S", combo_name, capacity = edge_value)
             # add edges between middle columns
-            self.G.add_edge(combo_name, str(combo[0].ID), capacity = 10000)#float('inf'))
-            self.G.add_edge(combo_name, str(combo[1].ID), capacity = 10000)#float('inf'))
+            self.G.add_edge(combo_name, str(combo[0].ID), capacity = np.Inf)
+            self.G.add_edge(combo_name, str(combo[1].ID), capacity = np.Inf)
 
         # team object for "network owner" (their teamID)
         net_owner = all_teams[teamID]
@@ -148,16 +149,16 @@ class Division:
         the amount of additional games they have against each other
         return: True if team is eliminated, False otherwise
         '''
-        out_edges = self.G.out_edges('S') # 's' is source node
+        out_edges = self.G.out_edges('S') # 'S' is source
         source_out = 0 # sum of capacites of edges leaving the source
         for edge in out_edges:
             source_out += nx.maximum_flow_value(self.G, edge[0], edge[1])
 
         max_flow = nx.maximum_flow_value(self.G, 'S', 'T') # 'S' is source, 'T' is sink
-        print("source_out, max_flow",source_out, max_flow)
+        # print("source_out, max_flow",source_out, max_flow)
         # for edge in self.G.out_edges('S'):
         #     print(edge, nx.maximum_flow_value(self.G, edge[0], edge[1]))
-        if source_out > max_flow: # not sure if should be > or >=
+        if source_out > max_flow:
             return True # person has been eliminated
         else:
             return False # person has not been eliminated
@@ -190,28 +191,45 @@ class Division:
                     out_edges.append(edge)
                 if s[1] == node:
                     in_edges.append(edge)
-            maxflow.add_constraint(sum(in_edges) == sum(out_edges))
+            # print(len(in_edges), len(out_edges))
+            if len(in_edges) > 0 and len(out_edges) > 0: # not source or sink
+                maxflow.add_constraint(sum(in_edges) == sum(out_edges))
 
         into_sink = [] # list of edges going into sink
+        outta_source = []
         # add capacity and >=0 constraints
         for edge in edges:
             s = str(edge).split("-")
-            capacity = nx.maximum_flow_value(self.G, s[0], s[1])
-            maxflow.add_constraint(edge <= capacity) #edge weight <= edge capacity
+            try:
+                capacity = nx.maximum_flow_value(self.G, s[0], s[1])
+                maxflow.add_constraint(edge <= capacity) #edge weight <= edge capacity
+            except:
+                pass
             maxflow.add_constraint(edge >= 0)
+            if s[0] == "S":
+                outta_source.append(edge)
             if s[1] == "T": # build up list of edges going into sink
                 into_sink.append(edge)
+
+        maxflow.add_constraint(sum(into_sink) == sum(outta_source))
 
         # objective function sums weights of edges going into T
         maxflow.set_objective('max', sum(into_sink)) # idk if this will actually work
 
         # we recommend using the 'cvxopt' solver once you set up the problem
-        # maxflow.options.solver = "cvxopt"
-        cvxopt.solvers.lp # I think this one
-        # solution = P.solve()
-        # solution.primals
+        maxflow.options.solver = "cvxopt"
+        # cvxopt.solvers.lp # I think this one
+        solution = maxflow.solve()
+        primals = solution.primals
 
-        return False
+        for weight in primals:
+            s = str(weight.name).split("-")
+            print(weight.name)
+            if s[0] == 'S': # if any edges out of source are not saturated, return false
+                capacity = nx.maximum_flow_value(self.G, s[0], s[1])
+                if (capacity - weight) < 1e-6:
+                    return False
+        return True
 
 
     def checkTeam(self, team):
