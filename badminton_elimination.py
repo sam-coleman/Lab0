@@ -8,10 +8,10 @@ import picos as pic
 import networkx as nx
 import itertools
 import cvxopt
-import matplotlib as plt
+import matplotlib.pyplot as plt
 from picos import RealVariable
 import numpy as np
-
+# use addvariable
 
 class Division:
     '''
@@ -114,9 +114,11 @@ class Division:
         other_team_combinations = itertools.combinations(other_teams, 2)
         # make list instead of itertools.combinations object for ease
         list_other_team_combos = list(other_team_combinations)
+
         # create column of nodes before sink, node is ID of each other team
-        for team in other_teams:
-            self.G.add_node(team.ID)
+        # for team in other_teams:
+        #     self.G.add_node(team.ID)
+        #     print(team)
 
         # create column of nodes after source and generate edge values and shit
         #for i in range(len(list_other_team_combos)):
@@ -193,33 +195,63 @@ class Division:
                     in_edges.append(edge)
             # print(len(in_edges), len(out_edges))
             if len(in_edges) > 0 and len(out_edges) > 0: # not source or sink
-                maxflow.add_constraint(sum(in_edges) == sum(out_edges))
+                maxflow.add_constraint(pic.sum(in_edges) == pic.sum(out_edges))
 
         into_sink = [] # list of edges going into sink
         outta_source = []
         # add capacity and >=0 constraints
-        for edge in edges:
+        f = {}
+        s_edges = []
+        for edge in self.G.edges():
             s = str(edge).split("-")
-            try:
-                capacity = nx.maximum_flow_value(self.G, s[0], s[1])
-                maxflow.add_constraint(edge <= capacity) #edge weight <= edge capacity
-            except:
-                pass
-            maxflow.add_constraint(edge >= 0)
-            if s[0] == "S":
-                outta_source.append(edge)
-            if s[1] == "T": # build up list of edges going into sink
-                into_sink.append(edge)
+            if self.G[edge[0]][edge[1]]['capacity'] < sys.maxsize:
+                print(self.G[edge[0]][edge[1]]['capacity'])
+                f[edge] = maxflow.add_variable('f[{0}]'.format(edge),1,lower=0,upper = self.G[edge[0]][edge[1]]['capacity'])
+            else:
+                f[edge] = maxflow.add_variable('f[{0}]'.format(edge),1,lower=0)
 
-        maxflow.add_constraint(sum(into_sink) == sum(outta_source))
+            if edge[0] is 'S':
+                s_edges.append(edge)
+            # try:
+            #     capacity = nx.maximum_flow_value(self.G, s[0], s[1])
+            #     maxflow.add_constraint(edge <= capacity) #edge weight <= edge capacity
+            # except:
+            #     pass
+            # maxflow.add_constraint(edge >= 0)
+            # if s[0] == "S":
+            #     outta_source.append(edge)
+            # if s[1] == "T": # build up list of edges going into sink
+            #     into_sink.append(edge)
+
+        F = maxflow.add_variable('F', 1)
+        for node in self.G.nodes():
+            if node == "S":
+                maxflow.add_constraint(pic.sum([f[p,node] for p in self.G.predecessors(node)]) + F == pic.sum([f[node,p] for p in self.G.successors(node)]))
+            elif node != "T":
+                maxflow.add_constraint(pic.sum([f[p,node] for p in self.G.predecessors(node)])
+                                       == pic.sum([f[node,p] for p in self.G.successors(node)]))
+
+        maxflow.set_objective('max', F)
+
+
+        # our code
+        # maxflow.add_constraint(pic.sum(into_sink) == pic.sum(outta_source))
 
         # objective function sums weights of edges going into T
-        maxflow.set_objective('max', sum(into_sink)) # idk if this will actually work
+        # maxflow.set_objective('max', pic.sum(into_sink)) # idk if this will actually work
 
         # we recommend using the 'cvxopt' solver once you set up the problem
         # maxflow.options.solver = "cvxopt"
         # cvxopt.solvers.lp # I think this one
+
         solution = maxflow.solve(verbose=0, solver='cvxopt')
+        flag = False
+        for flow in s_edges:
+            # check to see if capacity is saturated, if not (aka diff is bigger than 0) it is eliminated
+            if abs(self.G[flow[0]][flow[1]]['capacity'] - f[flow].value) > 1e-5:
+                flag = True
+
+        # return flag
         primals = solution.primals
         #print(primals)
 
