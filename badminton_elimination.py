@@ -251,7 +251,7 @@ class Division:
             if abs(self.G[flow[0]][flow[1]]['capacity'] - f[flow].value) > 1e-5:
                 flag = True
 
-        # return flag
+        return flag
         primals = solution.primals
         #print(primals)
 
