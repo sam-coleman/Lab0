@@ -247,7 +247,27 @@ class Division:
         maxflow.set_objective('max', F)
 
         # Solve the problem.
-        maxflow.solve(solver='glpk')
+        solution = maxflow.solve(verbose = 0, solver='cvxopt')
+        primals = solution.value
+        print(f"PRIMALS IS {primals}")
+        for weight in primals:
+            s = str(weight.name).split("-")
+            if s[0] == 'S': # if any edges out of source are not saturated, return false
+                capacity = nx.maximum_flow_value(self.G, s[0], s[1])
+                if abs(capacity - weight) < 1e-5:
+                    return False
+        return True
+
+        #print(primals)
+        # is_eliminated = False
+        # #print(maxflow.source_out)
+        # # for flow in self.G.out_edges("S"):
+        # #     if f[flow].value != 0:
+        # #         print(f[flow].value)
+        #     #if self.G[flow[0]][flow[1]]['capacity'] - f[flow].value > 1e-5:
+        #         #is_eliminated = True
+        
+        # return is_eliminated
 
     def checkTeam(self, team):
         '''Checks that the team actually exists in this division.
